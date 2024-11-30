@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+
+import time
+from PIL import Image
+from inky.auto import auto
+
+print("""Inky Impression: Image Cycle Script
+
+Cycling through images...
+""")
+
+# Set up the Inky display
+inky_display = auto(ask_user=True, verbose=True)
+inky_display.set_border(inky_display.WHITE)
+
+# List of image file paths - put your own file paths here
+image_files = [
+    "image1.png",
+    "image2.png",
+    "image3.png",
+    "image4.png",
+    "image5.png",
+    "image6.png",
+    "image7.png",
+    "image8.png",
+    "image9.png",
+    "image10.png",
+]
+
+# Function to display an image
+def display_image(image_path):
+    img = Image.open(image_path)
+    img = img.rotate(90, expand=True)
+    img = img.resize((600, 448), resample=Image.LANCZOS)
+    img = img.convert("RGB")
+    inky_display.set_image(img)
+    inky_display.show()
+
+# Function to clear the screen
+def clear_screen():
+    blank_image = Image.new("RGB", (inky_display.width, inky_display.height), (255, 255, 255))
+    inky_display.set_image(blank_image)
+    inky_display.show()
+
+# Main loop to cycle through images
+try:
+    while True:
+        for image in image_files:
+            display_image(image)
+            time.sleep(1200)  # Display each image for 20 minutes
+        clear_screen()  # Clear the screen after a full cycle
+        time.sleep(5)   # Wait briefly before starting the next cycle
+except KeyboardInterrupt:
+    print("Exiting cycle script.")
