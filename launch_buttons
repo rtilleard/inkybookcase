@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+
+import subprocess
+from gpiozero import Button
+from time import sleep
+
+# GPIO pins for buttons (A = GPIO 5, B = GPIO 6)
+BUTTONS = {
+    'A': 5,
+    'B': 6,
+}
+
+button_a = Button(BUTTONS['A'], pull_up=True, bounce_time=0.25)
+button_b = Button(BUTTONS['B'], pull_up=True, bounce_time=0.25)
+
+# Paths
+VENV_ACTIVATE = "/home/pi/.virtualenvs/pimoroni/bin/activate"
+CYCLE_SCRIPT = "/home/pi/inky_buttons.py"
+
+# Variable to track the process
+process = None
+
+# Function to start the cycle script
+def start_cycle():
+    global process
+    if process is None or process.poll() is not None:
+        print("Starting cycle script...")
+        process = subprocess.Popen(
+            f"bash -c 'source {VENV_ACTIVATE} && python3 {CYCLE_SCRIPT}'",
+            shell=True,
+            executable="/bin/bash"
+        )
+    else:
+        print("Cycle script is already running.")
+
+# Function to stop the cycle script
+def stop_cycle():
+    global process
+    if process and process.poll() is None:
+        print("Stopping cycle script...")
+        process.terminate()
+        process.wait()  # Ensure the process finishes
+        process = None
+    else:
+        print("Cycle script is not running.")
+
+# Attach button handlers
+button_a.when_pressed = start_cycle
+button_b.when_pressed = stop_cycle
+
+# Keep the script running
+print("Listening for button presses...")
+while True:
+    sleep(0.1)
